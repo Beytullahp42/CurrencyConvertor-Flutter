@@ -19,3 +19,5 @@ Future<double> getCurrentPrice(String baseCurrency, String targetCurrency) async
   }
   throw Exception("Unknown error in fetching the rate.");
 }
+
+//I didn't create a model because it only returns a double value
