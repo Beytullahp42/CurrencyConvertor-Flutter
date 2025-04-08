@@ -2,7 +2,10 @@ import 'package:beytullah_paytar_quiz/api_key.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<double> getCurrentPrice(String baseCurrency, String targetCurrency) async {
+Future<double> getCurrentPrice(
+  String baseCurrency,
+  String targetCurrency,
+) async {
   final url = Uri.parse(
     'https://api.freecurrencyapi.com/v1/latest?apikey=$apiKey&base_currency=$baseCurrency',
   );

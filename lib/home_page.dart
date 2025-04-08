@@ -1,6 +1,7 @@
+import 'package:beytullah_paytar_quiz/api_key.dart';
 import 'package:flutter/material.dart';
-import 'currency_exchange_service.dart';
-
+import 'package:flutter/services.dart';
+import 'currency_convertor.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -12,6 +13,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final controller = CurrencyConverterController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,23 +26,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            //body()
             FutureBuilder(
-              future: rate,
+              future: controller.rate,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
+                  if (apiKey.isEmpty){
+                    return Text("Please enter your API key in api_key.dart");
+                  }
                   return Text("Error: ${snapshot.error}");
                 } else {
                   final newRate = snapshot.data!;
-                  if (rateDouble != newRate) {
-                    setRate(newRate);
-                    if (firstToSecondController.text.isNotEmpty) {
-                      convertFirstToSecond(firstToSecondController.text);
-                    } else if (secondToFirstController.text.isNotEmpty) {
-                      convertSecondToFirst(secondToFirstController.text);
-                    }
+                  if (controller.rateDouble != newRate) {
+                    controller.setRate(newRate);
                   }
                   return body();
                 }
@@ -50,51 +50,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          refresh(selectedFirstUnit, selectedSecondUnit);
+          setState(() {
+            controller.refresh(controller.selectedFirstUnit, controller.selectedSecondUnit);
+          });
         },
         tooltip: 'Refresh',
         child: const Icon(Icons.refresh),
       ),
     );
   }
-
-  late Future<double> rate;
-
-  @override
-  void initState() {
-    super.initState();
-    rate = getCurrentPrice(selectedFirstUnit, selectedSecondUnit);
-  }
-
-  double rateDouble = 0.0;
-
-  void setRate(double newRate) {
-    rateDouble = newRate;
-  }
-
-  void refresh(String first, String second) {
-    setState(() {
-      rate = getCurrentPrice(first, second);
-    });
-  }
-
-  TextEditingController secondToFirstController = TextEditingController();
-  TextEditingController firstToSecondController = TextEditingController();
-
-  void convertFirstToSecond(String input) {
-    double first = double.tryParse(input) ?? 0;
-    double second = first * rateDouble;
-    secondToFirstController.text = second.toStringAsFixed(2);
-  }
-
-  void convertSecondToFirst(String input) {
-    double second = double.tryParse(input) ?? 0;
-    double first = second / rateDouble;
-    firstToSecondController.text = first.toStringAsFixed(2);
-  }
-
-  String selectedFirstUnit = 'USD';
-  String selectedSecondUnit = 'EUR';
 
   Widget body() {
     return Center(
@@ -103,57 +67,55 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Text(
+              'Currency Converter',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: DropdownButton<String>(
-                    value: selectedFirstUnit,
+                    value: controller.selectedFirstUnit,
                     onChanged: (value) {
                       setState(() {
-                        selectedFirstUnit = value!;
-                        refresh(selectedFirstUnit, selectedSecondUnit);
+                        controller.selectedFirstUnit = value!;
+                        controller.refresh(controller.selectedFirstUnit, controller.selectedSecondUnit);
                       });
                     },
                     items:
-                    unitList.map((unit) {
-                      return DropdownMenuItem(
-                        value: unit,
-                        child: Text(unit),
-                      );
-                    }).toList(),
+                        controller.unitList.map((unit) {
+                          return DropdownMenuItem(
+                            value: unit,
+                            child: Text(unit),
+                          );
+                        }).toList(),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.swap_horiz),
                   onPressed: () {
                     setState(() {
-                      final temp = selectedFirstUnit;
-                      selectedFirstUnit = selectedSecondUnit;
-                      selectedSecondUnit = temp;
-
-                      refresh(
-                        selectedFirstUnit,
-                        selectedSecondUnit,
-                      ); //fetch new rate
+                      controller.swapUnits();
                     });
                   },
                 ),
                 Expanded(
                   child: DropdownButton<String>(
-                    value: selectedSecondUnit,
+                    value: controller.selectedSecondUnit,
                     onChanged: (value) {
                       setState(() {
-                        selectedSecondUnit = value!;
-                        refresh(selectedFirstUnit, selectedSecondUnit);
+                        controller.selectedSecondUnit = value!;
+                        controller.refresh(controller.selectedFirstUnit, controller.selectedSecondUnit);
                       });
                     },
                     items:
-                    unitList.map((unit) {
-                      return DropdownMenuItem(
-                        value: unit,
-                        child: Text(unit),
-                      );
-                    }).toList(),
+                        controller.unitList.map((unit) {
+                          return DropdownMenuItem(
+                            value: unit,
+                            child: Text(unit),
+                          );
+                        }).toList(),
                   ),
                 ),
               ],
@@ -163,23 +125,25 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: firstToSecondController,
+                    controller: controller.firstToSecondController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: convertFirstToSecond,
+                    onChanged: controller.convertFirstToSecond,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextField(
-                    controller: secondToFirstController,
+                    controller: controller.secondToFirstController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: convertSecondToFirst,
+                    onChanged: controller.convertSecondToFirst,
                   ),
                 ),
               ],
@@ -189,40 +153,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  List<String> unitList = [
-    'EUR',
-    'USD',
-    'JPY',
-    'BGN',
-    'CZK',
-    'DKK',
-    'GBP',
-    'HUF',
-    'PLN',
-    'RON',
-    'SEK',
-    'CHF',
-    'ISK',
-    'NOK',
-    'HRK',
-    'RUB',
-    'TRY',
-    'AUD',
-    'BRL',
-    'CAD',
-    'CNY',
-    'HKD',
-    'IDR',
-    'ILS',
-    'INR',
-    'KRW',
-    'MXN',
-    'MYR',
-    'NZD',
-    'PHP',
-    'SGD',
-    'THB',
-    'ZAR',
-  ];
 }
