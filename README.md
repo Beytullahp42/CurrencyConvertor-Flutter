@@ -1,16 +1,13 @@
-# beytullah_paytar_quiz
+# Currency Converter
 
-A new Flutter project.
+Currency Converter is an Android application developed for the quiz of SE-017 - Mobile Applications at Estonian Entrepreneurship University of Applied Sciences during the 2024-2025 spring semester.
 
-## Getting Started
+The app allows users to convert values between various international currencies using real-time exchange rates. It features an intuitive interface with a currency swap feature and supports over 30 global currencies.
 
-This project is a starting point for a Flutter application.
+## Used Technologies
 
-A few resources to get you started if this is your first Flutter project:
+The application is built using **Flutter** and **Dart**. The `http` package is used to fetch real-time exchange rates from the [Free Currency API.](https://freecurrencyapi.com/)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Screenshot
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="screenshot.png" width="200" />
