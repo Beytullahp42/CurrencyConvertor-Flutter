@@ -1,6 +1,6 @@
 # Currency Converter
 
-Currency Converter is an Android application developed for the quiz of SE-017 - Mobile Applications at Estonian Entrepreneurship University of Applied Sciences during the 2024-2025 spring semester.
+Currency Converter is an Android application developed for the quiz in SE-017 - Mobile Applications course at Estonian Entrepreneurship University of Applied Sciences during the 2024-2025 spring semester.
 
 The app allows users to convert values between various international currencies using real-time exchange rates. It features an intuitive interface with a currency swap feature and supports over 30 global currencies.
 
